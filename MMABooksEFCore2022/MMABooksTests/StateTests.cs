@@ -3,7 +3,7 @@ using System.Linq;
 using System;
 
 using NUnit.Framework;
-using MMABooksEFClasses.MarisModels;
+using MMABooksEFClasses.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MMABooksTests
@@ -28,7 +28,7 @@ namespace MMABooksTests
         public void GetAllTest()
         {
             states = dbContext.States.OrderBy(s => s.StateName).ToList();
-            Assert.AreEqual(52, states.Count);
+            Assert.AreEqual(53, states.Count);
             Assert.AreEqual("Alabama", states[0].StateName);
             PrintAll(states);
         }
@@ -56,7 +56,7 @@ namespace MMABooksTests
         {
             s = dbContext.States.Include("Customers").Where(s => s.StateCode == "OR").SingleOrDefault();
             Assert.IsNotNull(s);
-            Assert.AreEqual("Ore", s.StateName);
+            Assert.AreEqual("Oregon", s.StateName);
             Assert.AreEqual(5, s.Customers.Count);
             Console.WriteLine(s);
         }
@@ -64,22 +64,32 @@ namespace MMABooksTests
         [Test]
         public void DeleteTest()
         {
-            s = dbContext.States.Find("HI");
+            s = dbContext.States.Find("XX");
             dbContext.States.Remove(s);
             dbContext.SaveChanges();
-            Assert.IsNull(dbContext.States.Find("HI"));
+            Assert.IsNull(dbContext.States.Find("TestState"));
         }
 
         [Test]
         public void CreateTest()
         {
-
+            s = new State();
+            s.StateCode = "XX";
+            s.StateName = "TestState";
+            dbContext.States.Add(s);
+            dbContext.SaveChanges();
+            Assert.IsNotNull(dbContext.States.Find("XX"));
         }
 
         [Test]
         public void UpdateTest()
         {
-
+            s = dbContext.States.Find("OR");
+            s.StateName = "Oregon";
+            dbContext.States.Update(s);
+            dbContext.SaveChanges();
+            dbContext.States.Find("OR");
+            Assert.AreEqual("Oregon", s.StateName);
         }
 
         public void PrintAll(List<State> states)
